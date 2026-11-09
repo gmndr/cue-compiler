@@ -1,8 +1,8 @@
 // cue/overrides/dev/trino.cue
-package overrides.dev
+package dev
 
 import (
-  "base/trino"
+  "base"
   "_connexions"
   "_identifiants"
 )

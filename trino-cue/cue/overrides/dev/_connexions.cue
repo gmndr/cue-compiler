@@ -1,5 +1,5 @@
 // cue/overrides/dev/_connexions.cue
-package overrides.dev
+package dev
 
 // ========== CONNEXIONS EXTERNES ==========
 // Exemple : Connexion à PostgreSQL (pour le catalogue 'postgresql')
@@ -21,11 +21,5 @@ connexions: {
     secretKey:       "" // À surcharger via _identifiants.cue
     bucket:          "trino-data-dev"
     pathStyleAccess: true
-  }
-
-  // Connexion à une API externe (pour l'authentification)
-  externalAPI: {
-    url:      "https://api-dev.internal"
-    authType: "BEARER"
   }
 }
