@@ -2,8 +2,8 @@
 package main
 
 import (
-  "overrides/dev"
+  "overrides"
 )
 
 // Export pour Helm
-output: dev.trino
+output: overrides.dev
