@@ -2,7 +2,7 @@
 package dev
 
 import (
-  "base"
+  "base/trino"
   "_connexions"
   "_identifiants"
 )
