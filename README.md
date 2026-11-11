@@ -1,6 +1,6 @@
 # Trino CUE Compiler
 
-Ce dépôt gère la configuration déclarative de Trino à l'aide du langage [CUE](https://cuelang.org/). Il permet de factoriser les valeurs par défaut et d'appliquer des surcharges spécifiques par environnement afin de générer les valeurs Helm (`values.yaml`).
+Ce dépôt gère la configuration déclarative de Trino à l'aide du langage [CUE](https://cuelang.org/). Il factorise les valeurs communes dans une base minimale et applique de légères surcharges par environnement pour générer les valeurs Helm (`values.yaml`).
 
 ## Arborescence du projet
 
@@ -12,26 +12,26 @@ trino-cue/
     ├── cue.mod/
     │   └── module.cue           # Déclaration du module CUE ("trino.cue")
     ├── base/
-    │   ├── trino.cue            # Schéma et valeurs par défaut Trino (structure commune)
-    │   ├── connexions.cue       # Paramètres par défaut des connexions externes (Postgres, S3)
+    │   ├── trino.cue            # Schéma et configuration Trino par défaut
+    │   ├── connexions.cue       # Paramètres des connexions externes (Postgres, S3)
     │   └── identifiants.cue     # Placeholders des identifiants et secrets
     ├── overrides/
     │   ├── dev/
-    │   │   └── trino.cue        # Surcharges spécifiques à l'environnement de développement
+    │   │   └── trino.cue        # Surcharges minimales pour le développement
     │   └── prod/
-    │       └── trino.cue        # Surcharges spécifiques à l'environnement de production
+    │       └── trino.cue        # Surcharges minimales pour la production
     └── main.cue                 # Point d'entrée CUE : importe l'environnement ciblé et expose `output`
 ```
 
 ## Rôle des fichiers
 
-- **`cue/cue.mod/module.cue`** : Définit le module CUE et sa version linguistique, permettant l'importation propre de packages internes via `trino.cue/...`.
-- **`cue/base/trino.cue`** : Contient l'objet de base `trino` avec l'ensemble des définitions Kubernetes/Helm par défaut (serveur, JVM, service, etc.).
-- **`cue/base/connexions.cue`** : Fournit le modèle et les valeurs génériques pour les services externes (PostgreSQL, S3).
-- **`cue/base/identifiants.cue`** : Centralise les placeholders de secrets (identifiants admin, clés S3, base de données).
-- **`cue/overrides/dev/trino.cue`** : Surcharge uniquement les paramètres propres à l'environnement de développement (ressources allégées, hôtes dev, etc.).
-- **`cue/overrides/prod/trino.cue`** : Surcharge les paramètres adaptés à la production (nombre de workers, dimensionnement mémoire/CPU).
-- **`cue/main.cue`** : Expose le champ `output` qui combine la base avec les surcharges de l'environnement choisi (par défaut `dev`).
+- **`cue/cue.mod/module.cue`** : Définit le module CUE (`trino.cue`) pour permettre les imports internes.
+- **`cue/base/trino.cue`** : Contient la configuration Trino de référence (image, serveur, catalogues Postgres/Hive, auth, JVM, service).
+- **`cue/base/connexions.cue`** : Définit les adresses et options des services externes.
+- **`cue/base/identifiants.cue`** : Centralise les identifiants et secrets.
+- **`cue/overrides/dev/trino.cue`** : Delta pour le dev (nom d'hôte dev, bucket dev, environnement `development`).
+- **`cue/overrides/prod/trino.cue`** : Delta pour la prod (nom d'hôte prod, 4 workers, 8G JVM).
+- **`cue/main.cue`** : Expose `output: dev.trino` pour l'exportation Helm.
 
 ## Commandes utiles
 

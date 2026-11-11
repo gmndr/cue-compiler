@@ -1,7 +1,6 @@
 // cue/base/connexions.cue
 package base
 
-// Connexions externes de base (valeurs par défaut / génériques)
 connexions: {
 	postgres: {
 		host:     *"postgres.postgres.svc.cluster.local" | string
@@ -9,9 +8,9 @@ connexions: {
 		database: *"trino_metadata" | string
 	}
 	s3: {
-		endpoint:        *"" | string
+		endpoint:        *"https://s3.internal" | string
 		region:          *"eu-west-1" | string
-		bucket:          *"" | string
+		bucket:          *"trino-data" | string
 		pathStyleAccess: *true | bool
 	}
 }

@@ -1,7 +1,6 @@
 // cue/base/identifiants.cue
 package base
 
-// Identifiants de base (placeholders)
 identifiants: {
 	postgres: {
 		user:     *"trino" | string
