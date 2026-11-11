@@ -1,7 +1,9 @@
 // cue/main.cue
 package main
 
-import ("overrides")
+import (
+	"trino.cue/overrides/dev"
+)
 
 // Export pour Helm
 output: dev.trino
