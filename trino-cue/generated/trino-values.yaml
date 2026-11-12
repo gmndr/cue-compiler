@@ -1,0 +1,248 @@
+nameOverride: ""
+fullnameOverride: trino-dev
+coordinatorNameOverride: ""
+workerNameOverride: ""
+image:
+  registry: ""
+  repository: trinodb/trino
+  tag: "422"
+  digest: ""
+  useRepositoryAsSoleImageReference: false
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+server:
+  workers: 2
+  node:
+    environment: development
+    dataDir: /data/trino
+    pluginDir: /usr/lib/trino/plugin
+  log:
+    trino:
+      level: INFO
+  config:
+    path: /etc/trino
+    https:
+      enabled: false
+      port: 8443
+      keystore:
+        path: ""
+    authenticationType: PASSWORD
+    query:
+      maxMemory: 4GB
+    exchangeManager: {}
+    workerExtraConfig: ""
+    coordinatorExtraConfig: ""
+  autoscaling:
+    enabled: false
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 50
+    targetMemoryUtilizationPercentage: 80
+    behavior: {}
+  keda:
+    enabled: false
+    pollingInterval: 30
+    cooldownPeriod: 300
+    initialCooldownPeriod: 0
+    minReplicaCount: 0
+    maxReplicaCount: 5
+    fallback: {}
+    advanced: {}
+    triggers: []
+    annotations: {}
+accessControl: {}
+headerAuthenticator: {}
+resourceGroups: {}
+sessionProperties: {}
+eventListenerProperties: []
+catalogs:
+  tpch: null
+  tpcds: null
+  postgresql: |-
+    connector.name=postgresql
+    connection-url=jdbc:postgresql://postgres-dev.postgres.svc.cluster.local:5432/trino_metadata
+    connection-user=trino
+    connection-password=CHANGE_ME_POSTGRES_PASSWORD
+  hive: |-
+    connector.name=hive
+    hive.metastore.uri=thrift://hive-metastore-dev.hive.svc.cluster.local:9083
+    hive.s3.endpoint=https://s3-dev.internal
+    hive.s3.path-style-access=true
+    hive.s3.aws-access-key=CHANGE_ME_S3_ACCESS_KEY
+    hive.s3.aws-secret-key=CHANGE_ME_S3_SECRET_KEY
+additionalCatalogs: {}
+auth:
+  passwordAuth: admin:CHANGE_ME_ADMIN_PASSWORD
+  passwordAuthSecret: ""
+configMounts: []
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+coordinator:
+  deployment:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+    progressDeadlineSeconds: 600
+    revisionHistoryLimit: 10
+    strategy: {}
+  jvm:
+    maxHeapSize: 4G
+    minHeapSize: ""
+    maxHeapPercent: ""
+    initialHeapPercent: ""
+    gcMethod:
+      type: UseG1GC
+      g1:
+        heapRegionSize: 16M
+  config:
+    memory:
+      heapHeadroomPerNode: ""
+    nodeScheduler:
+      includeCoordinator: false
+    query:
+      maxMemoryPerNode: 2GB
+  additionalJVMConfig: []
+  additionalExposedPorts: {}
+  resources:
+    requests:
+      cpu: 500m
+      memory: 4Gi
+    limits:
+      cpu: "1"
+      memory: 4Gi
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+  terminationGracePeriodSeconds: 30
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  priorityClassName: ""
+  annotations: {}
+  labels: {}
+  configMounts: []
+  secretMounts:
+    - name: postgres-credentials
+      secretName: trino-postgres-credentials
+      path: /etc/trino/secrets/postgres
+    - name: s3-credentials
+      secretName: trino-s3-credentials
+      path: /etc/trino/secrets/s3
+  additionalConfigFiles: {}
+  additionalVolumes: []
+  additionalVolumeMounts: []
+env:
+  - name: TRINO_ENV
+    value: development
+  - name: JAVA_TOOL_OPTIONS
+    value: -Djavax.net.ssl.trustStore=/etc/trino/secrets/truststore.jks
+envFrom: []
+initContainers:
+  coordinator: []
+  worker: []
+secretMounts: []
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+service:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  type: ClusterIP
+  port: 8080
+  nodePort: ""
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+shareProcessNamespace:
+  coordinator: false
+  worker: false
+sidecarContainers:
+  coordinator: []
+  worker: []
+worker:
+  deployment:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+    progressDeadlineSeconds: 600
+    revisionHistoryLimit: 10
+    strategy: {}
+  jvm:
+    maxHeapSize: 4G
+    minHeapSize: ""
+    maxHeapPercent: ""
+    initialHeapPercent: ""
+    gcMethod:
+      type: UseG1GC
+      g1:
+        heapRegionSize: 16M
+  config:
+    memory:
+      heapHeadroomPerNode: ""
+    query:
+      maxMemoryPerNode: 2GB
+  additionalJVMConfig: []
+  additionalExposedPorts: {}
+  resources:
+    requests:
+      cpu: "1"
+      memory: 4Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+  lifecycle: {}
+  gracefulShutdown:
+    enabled: true
+    gracePeriodSeconds: 120
+  terminationGracePeriodSeconds: 30
+  nodeSelector: {}
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: trino
+      effect: NoSchedule
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - trino-worker
+            topologyKey: kubernetes.io/hostname
+  topologySpreadConstraints: []
+  priorityClassName: ""
+  annotations: {}
+  labels: {}
+  configMounts: []
+  secretMounts:
+    - name: postgres-credentials
+      secretName: trino-postgres-credentials
+      path: /etc/trino/secrets/postgres
+    - name: s3-credentials
+      secretName: trino-s3-credentials
+      path: /etc/trino/secrets/s3
+  additionalConfigFiles: {}
+  additionalVolumes: []
+  additionalVolumeMounts: []
+  additionalNodeProperties: []
+  additionalConfigProperties:
+    - query.client.timeout=5m
+    - query.max-run-time=1h
+    - query.max-queued-time=30m
+  additionalLogProperties: []
+  additionalExchangeManagerProperties:
+    - exchange.s3.region=eu-west-1
+    - exchange.s3.endpoint=https://s3-dev.internal
+    - exchange.s3.aws-access-key=CHANGE_ME_S3_ACCESS_KEY
+    - exchange.s3.aws-secret-key=CHANGE_ME_S3_SECRET_KEY
