@@ -2,31 +2,31 @@
 package base
 
 // ========== GLOBAL ==========
-nameOverride: *""
-fullnameOverride: *""
-coordinatorNameOverride: *""
-workerNameOverride: *""
+nameOverride: *"" | string
+fullnameOverride: *"" | string
+coordinatorNameOverride: *"" | string
+workerNameOverride: *"" | string
 
 // ========== IMAGE ==========
 image: {
-  registry:        *""
-  repository:      *"trinodb/trino"
-  tag:             *""
-  digest:          *""
+  registry:        *"" | string
+  repository:      *"trinodb/trino" | string
+  tag:             *"" | string
+  digest:          *"" | string
   useRepositoryAsSoleImageReference: false
-  pullPolicy:      *"IfNotPresent"
+  pullPolicy:      *"IfNotPresent" | string
 }
 
-imagePullSecrets: [] & [for _, v in _ { v: name: string }]
+imagePullSecrets: [...{name: string}]
 
 // ========== SERVER ==========
 server: {
   workers: 2
 
   node: {
-    environment: *"production"
-    dataDir:     *"/data/trino"
-    pluginDir:   *"/usr/lib/trino/plugin"
+    environment: *"production" | string
+    dataDir:     *"/data/trino" | string
+    pluginDir:   *"/usr/lib/trino/plugin" | string
   }
 
   log: {
@@ -36,28 +36,28 @@ server: {
   }
 
   config: {
-    path: *""/etc/trino""
+    path: *"/etc/trino" | string
     https: {
       enabled: false
       port:   8443 & >= 1024 & <= 65535
       keystore: {
-        path: *""
+        path: *"" | string
       }
     }
-    authenticationType: *""
+    authenticationType: *"" | string
     query: {
-      maxMemory: *"4GB"
+      maxMemory: *"4GB" | string
     }
     exchangeManager: {}
-    workerExtraConfig:   *""
-    coordinatorExtraConfig: *""
+    workerExtraConfig:   *"" | string
+    coordinatorExtraConfig: *"" | string
   }
 
   autoscaling: {
     enabled: false
     maxReplicas: 5
-    targetCPUUtilizationPercentage:    50 | int & >= 0 & <= 100
-    targetMemoryUtilizationPercentage: 80 | int & >= 0 & <= 100
+    targetCPUUtilizationPercentage:    *50 | int & >= 0 & <= 100
+    targetMemoryUtilizationPercentage: *80 | int & >= 0 & <= 100
     behavior: {}
   }
 
@@ -70,7 +70,7 @@ server: {
     maxReplicaCount: 5
     fallback: {}
     advanced: {}
-    triggers: []
+    triggers: [...]
     annotations: {}
   }
 }
@@ -80,29 +80,29 @@ accessControl: {}
 headerAuthenticator: {}
 resourceGroups: {}
 sessionProperties: {}
-eventListenerProperties: []
+eventListenerProperties: [...]
 
 // ========== CATALOGS ==========
 catalogs: {
-  tpch:  *"connector.name=tpch\ntpch.splits-per-node=4"
-  tpcds: *"connector.name=tpcds\ntpcds.splits-per-node=4"
+  tpch:  *"connector.name=tpch\ntpch.splits-per-node=4" | null
+  tpcds: *"connector.name=tpcds\ntpcds.splits-per-node=4" | null
 }
 
 additionalCatalogs: {}
 
 // ========== ENV & SECRETS ==========
-env: [for _, v in _ { v: name: string, value: string }]
-envFrom: [for _, v in _ { v: configMapRef?: {name: string}, secretRef?: {name: string} }]
+env: [...{name: string, value: string}]
+envFrom: [...{configMapRef?: {name: string}, secretRef?: {name: string}}]
 
 // ========== CONTAINERS ==========
 initContainers: {
-  coordinator: []
-  worker:      []
+  coordinator: [...]
+  worker:      [...]
 }
 
 sidecarContainers: {
-  coordinator: []
-  worker:      []
+  coordinator: [...]
+  worker:      [...]
 }
 
 securityContext: {
@@ -125,9 +125,9 @@ shareProcessNamespace: {
 // ========== SERVICE ==========
 service: {
   annotations: {}
-  type: *"ClusterIP"
+  type: *"ClusterIP" | string
   port: 8080 & >= 1024 & <= 65535
-  nodePort: *""
+  nodePort: *"" | string
 }
 
 auth: {}
@@ -135,13 +135,13 @@ auth: {}
 // ========== SERVICE ACCOUNT ==========
 serviceAccount: {
   create: false
-  name:   *""
+  name:   *"" | string
   annotations: {}
 }
 
 // ========== CONFIG/SECRET MOUNTS ==========
-configMounts: [for _, v in _ { v: name: string, configMap: string, path: string, subPath?: string }]
-secretMounts: [for _, v in _ { v: name: string, secretName: string, path: string, subPath?: string }]
+configMounts: [...{name: string, configMap: string, path: string, subPath?: string}]
+secretMounts: [...{name: string, secretName: string, path: string, subPath?: string}]
 
 // ========== COORDINATOR ==========
 coordinator: {
@@ -153,31 +153,31 @@ coordinator: {
   }
 
   jvm: {
-    maxHeapSize: *"8G"
-    minHeapSize: *""
-    maxHeapPercent: *""
-    initialHeapPercent: *""
+    maxHeapSize: *"8G" | string
+    minHeapSize: *"" | string
+    maxHeapPercent: *"" | string
+    initialHeapPercent: *"" | string
     gcMethod: {
-      type: *"UseG1GC"
+      type: *"UseG1GC" | string
       g1: {
-        heapRegionSize: *"32M"
+        heapRegionSize: *"32M" | string
       }
     }
   }
 
   config: {
     memory: {
-      heapHeadroomPerNode: *""
+      heapHeadroomPerNode: *"" | string
     }
     nodeScheduler: {
       includeCoordinator: false
     }
     query: {
-      maxMemoryPerNode: *"1GB"
+      maxMemoryPerNode: *"1GB" | string
     }
   }
 
-  additionalJVMConfig: []
+  additionalJVMConfig: [...]
   additionalExposedPorts: {}
   resources: {}
   livenessProbe: {}
@@ -186,16 +186,16 @@ coordinator: {
   lifecycle: {}
   terminationGracePeriodSeconds: 30
   nodeSelector: {}
-  tolerations: []
+  tolerations: [...]
   affinity: {}
-  priorityClassName: ~
+  priorityClassName: *"" | string
   annotations: {}
   labels: {}
-  configMounts: []
-  secretMounts: []
+  configMounts: [...]
+  secretMounts: [...]
   additionalConfigFiles: {}
-  additionalVolumes: []
-  additionalVolumeMounts: []
+  additionalVolumes: [...]
+  additionalVolumeMounts: [...]
 }
 
 // ========== WORKER ==========
@@ -208,28 +208,28 @@ worker: {
   }
 
   jvm: {
-    maxHeapSize: *"8G"
-    minHeapSize: *""
-    maxHeapPercent: *""
-    initialHeapPercent: *""
+    maxHeapSize: *"8G" | string
+    minHeapSize: *"" | string
+    maxHeapPercent: *"" | string
+    initialHeapPercent: *"" | string
     gcMethod: {
-      type: *"UseG1GC"
+      type: *"UseG1GC" | string
       g1: {
-        heapRegionSize: *"32M"
+        heapRegionSize: *"32M" | string
       }
     }
   }
 
   config: {
     memory: {
-      heapHeadroomPerNode: *""
+      heapHeadroomPerNode: *"" | string
     }
     query: {
-      maxMemoryPerNode: *"1GB"
+      maxMemoryPerNode: *"1GB" | string
     }
   }
 
-  additionalJVMConfig: []
+  additionalJVMConfig: [...]
   additionalExposedPorts: {}
   resources: {}
   livenessProbe: {}
@@ -237,26 +237,26 @@ worker: {
   startupProbe: {}
   lifecycle: {}
   gracefulShutdown: {
-    enabled: false
+    enabled: *false | bool
     gracePeriodSeconds: 120
   }
   terminationGracePeriodSeconds: 30
   nodeSelector: {}
-  tolerations: []
+  tolerations: [...]
   affinity: {}
-  topologySpreadConstraints: []
-  priorityClassName: ~
+  topologySpreadConstraints: [...]
+  priorityClassName: *"" | string
   annotations: {}
   labels: {}
-  configMounts: []
-  secretMounts: []
+  configMounts: [...]
+  secretMounts: [...]
   additionalConfigFiles: {}
-  additionalVolumes: []
-  additionalVolumeMounts: []
+  additionalVolumes: [...]
+  additionalVolumeMounts: [...]
 
   // ========== ADDITIONAL PROPERTIES ==========
-  additionalNodeProperties:    []
-  additionalConfigProperties:  []
-  additionalLogProperties:     []
-  additionalExchangeManagerProperties: []
+  additionalNodeProperties:    [...]
+  additionalConfigProperties:  [...]
+  additionalLogProperties:     [...]
+  additionalExchangeManagerProperties: [...]
 }

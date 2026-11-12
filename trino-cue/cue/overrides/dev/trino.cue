@@ -2,13 +2,13 @@
 package dev
 
 import (
-  "base/trino"
-  "_connexions"
-  "_identifiants"
+	"github.com/gmndr/cue-compiler/trino-cue/cue/base"
+	"github.com/gmndr/cue-compiler/trino-cue/cue/overrides/connexions"
+	"github.com/gmndr/cue-compiler/trino-cue/cue/overrides/identifiants"
 )
 
 // ========== FUSION DES VALEURS ==========
-trino: base.trino & {
+trino: base & {
   // ========== GLOBAL ==========
   fullnameOverride: "trino-dev"
 
@@ -37,20 +37,22 @@ trino: base.trino & {
   // Remplace les catalogues par défaut par ceux de ton environnement
   catalogs: {
     // Catalogue PostgreSQL (pour les métadonnées)
-    postgresql: |
+    postgresql: """
       connector.name=postgresql
-      connection-url=jdbc:postgresql://\(_connexions.postgres.host):\(_connexions.postgres.port)/\(_connexions.postgres.database)
-      connection-user=\(_identifiants.postgres.user)
-      connection-password=\(_identifiants.postgres.password)
+      connection-url=jdbc:postgresql://\(connexions.postgres.host):\(connexions.postgres.port)/\(connexions.postgres.database)
+      connection-user=\(identifiants.postgres.user)
+      connection-password=\(identifiants.postgres.password)
+      """
 
     // Catalogue Hive (avec stockage S3)
-    hive: |
+    hive: """
       connector.name=hive
       hive.metastore.uri=thrift://hive-metastore-dev.hive.svc.cluster.local:9083
-      hive.s3.endpoint=\(_connexions.s3.endpoint)
-      hive.s3.path-style-access=\(_connexions.s3.pathStyleAccess)
-      hive.s3.aws-access-key=\(_identifiants.s3.accessKey)
-      hive.s3.aws-secret-key=\(_identifiants.s3.secretKey)
+      hive.s3.endpoint=\(connexions.s3.endpoint)
+      hive.s3.path-style-access=\(connexions.s3.pathStyleAccess)
+      hive.s3.aws-access-key=\(identifiants.s3.accessKey)
+      hive.s3.aws-secret-key=\(identifiants.s3.secretKey)
+      """
 
     // Supprime les catalogues par défaut (tpch, tpcds)
     tpch: null
@@ -59,7 +61,7 @@ trino: base.trino & {
 
   // ========== AUTHENTIFICATION ==========
   auth: {
-    passwordAuth: "\(_identifiants.trino.adminUser):\(_identifiants.trino.adminPassword)"
+    passwordAuth: "\(identifiants.trino.adminUser):\(identifiants.trino.adminPassword)"
     passwordAuthSecret: "" // Optionnel : nom d'un Secret Kubernetes
   }
 
@@ -202,6 +204,20 @@ trino: base.trino & {
         path:      "/etc/trino/secrets/s3"
       },
     ]
+
+    // ========== ADDITIONAL PROPERTIES ==========
+    additionalConfigProperties: [
+      "query.client.timeout=5m",
+      "query.max-run-time=1h",
+      "query.max-queued-time=30m",
+    ]
+
+    additionalExchangeManagerProperties: [
+      "exchange.s3.region=\(connexions.s3.region)",
+      "exchange.s3.endpoint=\(connexions.s3.endpoint)",
+      "exchange.s3.aws-access-key=\(identifiants.s3.accessKey)",
+      "exchange.s3.aws-secret-key=\(identifiants.s3.secretKey)",
+    ]
   }
 
   // ========== SERVICE ==========
@@ -217,19 +233,5 @@ trino: base.trino & {
   env: [
     {name: "TRINO_ENV", value: "development"},
     {name: "JAVA_TOOL_OPTIONS", value: "-Djavax.net.ssl.trustStore=/etc/trino/secrets/truststore.jks"},
-  ]
-
-  // ========== ADDITIONAL PROPERTIES ==========
-  additionalConfigProperties: [
-    "query.client.timeout=5m",
-    "query.max-run-time=1h",
-    "query.max-queued-time=30m",
-  ]
-
-  additionalExchangeManagerProperties: [
-    "exchange.s3.region=\(_connexions.s3.region)",
-    "exchange.s3.endpoint=\(_connexions.s3.endpoint)",
-    "exchange.s3.aws-access-key=\(_identifiants.s3.accessKey)",
-    "exchange.s3.aws-secret-key=\(_identifiants.s3.secretKey)",
   ]
 }
