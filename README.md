@@ -26,18 +26,30 @@ trino-cue/generated/trino-values.yaml   # values générées (export CUE)
 Pour ajouter un contexte (ex. `prod`), créer `overrides/prod/trino.cue`
 (paquet `prod`) et pointer `main.cue` dessus.
 
-## Commandes
+## Générer les values (workflow)
 
-Depuis la racine du dépôt :
+Depuis la racine du dépôt, en 3 étapes :
 
 ```sh
-# Valider le paquet CUE (aucune sortie = OK)
+# 1. Valider le paquet CUE (aucune sortie, code de retour 0 = OK)
 cue vet ./trino-cue/cue
-cue vet ./...                       # tous les paquets
+cue vet ./...                       # optionnel : valide tous les paquets du module
 
-# Générer les values Helm
+# 2. Générer le fichier values à partir du champ `output` de main.cue
 cue export ./trino-cue/cue -e output --out yaml > trino-cue/generated/trino-values.yaml
+
+# 3. Vérifier que le fichier commité est à jour (aucune différence = OK)
+cue export ./trino-cue/cue -e output --out yaml | diff - trino-cue/generated/trino-values.yaml
 ```
+
+Détail des options d'export :
+
+- `-e output` (`--expression`) : exporte uniquement le champ `output` (le bloc
+  `trino` fusionné base + override) — sans lui, le YAML contiendrait une clé
+  enveloppe `output:` inutilisable directement comme values Helm ;
+- `--out yaml` : force la sortie YAML pour le fichier `.yaml` ;
+- `> trino-cue/generated/trino-values.yaml` : écrit le résultat dans le fichier
+  généré du produit.
 
 > Note : avec cue >= v0.9, un argument répertoire relatif doit commencer par
 > `./` (`cue vet ./trino-cue/cue`). La forme nue `cue vet trino-cue/cue` est
