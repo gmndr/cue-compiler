@@ -1,262 +1,264 @@
-// cue/base/trino.cue
+// Généré depuis charts/trino/values.yaml par tools/values2cue.py — ne pas éditer à la main.
 package base
 
-// ========== GLOBAL ==========
-nameOverride: *"" | string
-fullnameOverride: *"" | string
-coordinatorNameOverride: *"" | string
-workerNameOverride: *"" | string
-
-// ========== IMAGE ==========
+nameOverride:            *null | _
+fullnameOverride:        *null | _
+coordinatorNameOverride: *null | _
+workerNameOverride:      *null | _
 image: {
-  registry:        *"" | string
-  repository:      *"trinodb/trino" | string
-  tag:             *"" | string
-  digest:          *"" | string
-  useRepositoryAsSoleImageReference: false
-  pullPolicy:      *"IfNotPresent" | string
+	registry:                          *"" | _
+	repository:                        *"trinodb/trino" | _
+	tag:                               *"" | _
+	digest:                            *"" | _
+	useRepositoryAsSoleImageReference: *false | _
+	pullPolicy:                        *"IfNotPresent" | _
 }
-
-imagePullSecrets: [...{name: string}]
-
-// ========== SERVER ==========
+imagePullSecrets: *[] | _
 server: {
-  workers: 2
-
-  node: {
-    environment: *"production" | string
-    dataDir:     *"/data/trino" | string
-    pluginDir:   *"/usr/lib/trino/plugin" | string
-  }
-
-  log: {
-    trino: {
-      level: *"INFO" | "DEBUG" | "WARN" | "ERROR" | "FATAL"
-    }
-  }
-
-  config: {
-    path: *"/etc/trino" | string
-    https: {
-      enabled: false
-      port:   8443 & >= 1024 & <= 65535
-      keystore: {
-        path: *"" | string
-      }
-    }
-    authenticationType: *"" | string
-    query: {
-      maxMemory: *"4GB" | string
-    }
-    exchangeManager: {}
-    workerExtraConfig:   *"" | string
-    coordinatorExtraConfig: *"" | string
-  }
-
-  autoscaling: {
-    enabled: false
-    maxReplicas: 5
-    targetCPUUtilizationPercentage:    *50 | int & >= 0 & <= 100
-    targetMemoryUtilizationPercentage: *80 | int & >= 0 & <= 100
-    behavior: {}
-  }
-
-  keda: {
-    enabled: false
-    pollingInterval: 30
-    cooldownPeriod: 300
-    initialCooldownPeriod: 0
-    minReplicaCount: 0
-    maxReplicaCount: 5
-    fallback: {}
-    advanced: {}
-    triggers: [...]
-    annotations: {}
-  }
+	workers: *2 | _
+	node: {
+		environment: *"production" | _
+		dataDir:     *"/data/trino" | _
+		pluginDir:   *"/usr/lib/trino/plugin" | _
+	}
+	log: {
+		trino: {
+			level: *"INFO" | _
+		}
+	}
+	config: {
+		path: *"/etc/trino" | _
+		https: {
+			enabled: *false | _
+			port:    *8443 | _
+			keystore: {
+				path: *"" | _
+			}
+		}
+		authenticationType: *"" | _
+		query: {
+			maxMemory: *"4GB" | _
+		}
+	}
+	exchangeManager: {}
+	workerExtraConfig:      *"" | _
+	coordinatorExtraConfig: *"" | _
+	autoscaling: {
+		enabled:                           *false | _
+		maxReplicas:                       *5 | _
+		targetCPUUtilizationPercentage:    *50 | _
+		targetMemoryUtilizationPercentage: *80 | _
+		behavior: {}
+	}
+	keda: {
+		enabled:               *false | _
+		pollingInterval:       *30 | _
+		cooldownPeriod:        *300 | _
+		initialCooldownPeriod: *0 | _
+		minReplicaCount:       *0 | _
+		maxReplicaCount:       *5 | _
+		fallback: {}
+		advanced: {}
+		triggers: *[] | _
+		annotations: {}
+	}
 }
-
-// ========== SECURITY ==========
 accessControl: {}
 headerAuthenticator: {}
 resourceGroups: {}
+additionalNodeProperties: *[] | _
+additionalConfigProperties: *[] | _
+additionalLogProperties: *[] | _
+additionalExchangeManagerProperties: *[] | _
 sessionProperties: {}
-eventListenerProperties: [...]
-
-// ========== CATALOGS ==========
+eventListenerProperties: *[] | _
 catalogs: {
-  tpch:  *"connector.name=tpch\ntpch.splits-per-node=4" | null
-  tpcds: *"connector.name=tpcds\ntpcds.splits-per-node=4" | null
+	tpch:  *"connector.name=tpch\ntpch.splits-per-node=4\n" | _
+	tpcds: *"connector.name=tpcds\ntpcds.splits-per-node=4\n" | _
 }
-
 additionalCatalogs: {}
-
-// ========== ENV & SECRETS ==========
-env: [...{name: string, value: string}]
-envFrom: [...{configMapRef?: {name: string}, secretRef?: {name: string}}]
-
-// ========== CONTAINERS ==========
-initContainers: {
-  coordinator: [...]
-  worker:      [...]
-}
-
-sidecarContainers: {
-  coordinator: [...]
-  worker:      [...]
-}
-
+env: *[] | _
+envFrom: *[] | _
+initContainers: {}
+sidecarContainers: {}
 securityContext: {
-  runAsUser:  1000
-  runAsGroup: 1000
+	runAsUser:  *1000 | _
+	runAsGroup: *1000 | _
 }
-
 containerSecurityContext: {
-  allowPrivilegeEscalation: false
-  capabilities: {
-    drop: ["ALL"]
-  }
+	allowPrivilegeEscalation: *false | _
+	capabilities: {
+		drop: *["ALL"] | _
+	}
 }
-
 shareProcessNamespace: {
-  coordinator: false
-  worker:      false
+	coordinator: *false | _
+	worker:      *false | _
 }
-
-// ========== SERVICE ==========
 service: {
-  annotations: {}
-  type: *"ClusterIP" | string
-  port: 8080 & >= 1024 & <= 65535
-  nodePort: *"" | string
+	annotations: {}
+	type:     *"ClusterIP" | _
+	port:     *8080 | _
+	nodePort: *"" | _
 }
-
 auth: {}
-
-// ========== SERVICE ACCOUNT ==========
 serviceAccount: {
-  create: false
-  name:   *"" | string
-  annotations: {}
+	create: *false | _
+	name:   *"" | _
+	annotations: {}
 }
-
-// ========== CONFIG/SECRET MOUNTS ==========
-configMounts: [...{name: string, configMap: string, path: string, subPath?: string}]
-secretMounts: [...{name: string, secretName: string, path: string, subPath?: string}]
-
-// ========== COORDINATOR ==========
+configMounts: *[] | _
+secretMounts: *[] | _
 coordinator: {
-  deployment: {
-    annotations: {}
-    progressDeadlineSeconds: 600
-    revisionHistoryLimit: 10
-    strategy: {}
-  }
-
-  jvm: {
-    maxHeapSize: *"8G" | string
-    minHeapSize: *"" | string
-    maxHeapPercent: *"" | string
-    initialHeapPercent: *"" | string
-    gcMethod: {
-      type: *"UseG1GC" | string
-      g1: {
-        heapRegionSize: *"32M" | string
-      }
-    }
-  }
-
-  config: {
-    memory: {
-      heapHeadroomPerNode: *"" | string
-    }
-    nodeScheduler: {
-      includeCoordinator: false
-    }
-    query: {
-      maxMemoryPerNode: *"1GB" | string
-    }
-  }
-
-  additionalJVMConfig: [...]
-  additionalExposedPorts: {}
-  resources: {}
-  livenessProbe: {}
-  readinessProbe: {}
-  startupProbe: {}
-  lifecycle: {}
-  terminationGracePeriodSeconds: 30
-  nodeSelector: {}
-  tolerations: [...]
-  affinity: {}
-  priorityClassName: *"" | string
-  annotations: {}
-  labels: {}
-  configMounts: [...]
-  secretMounts: [...]
-  additionalConfigFiles: {}
-  additionalVolumes: [...]
-  additionalVolumeMounts: [...]
+	deployment: {
+		annotations: {}
+		progressDeadlineSeconds: *600 | _
+		revisionHistoryLimit:    *10 | _
+		strategy: {}
+	}
+	jvm: {
+		maxHeapSize:        *"8G" | _
+		minHeapSize:        *null | _
+		maxHeapPercent:     *null | _
+		initialHeapPercent: *null | _
+		gcMethod: {
+			type: *"UseG1GC" | _
+			g1: {
+				heapRegionSize: *"32M" | _
+			}
+		}
+	}
+	config: {
+		memory: {
+			heapHeadroomPerNode: *"" | _
+		}
+		nodeScheduler: {
+			includeCoordinator: *false | _
+		}
+		query: {
+			maxMemoryPerNode: *"1GB" | _
+		}
+	}
+	additionalJVMConfig: *[] | _
+	additionalExposedPorts: {}
+	resources: {}
+	livenessProbe: {}
+	readinessProbe: {}
+	startupProbe: {}
+	lifecycle: {}
+	terminationGracePeriodSeconds: *30 | _
+	nodeSelector: {}
+	tolerations: *[] | _
+	affinity: {}
+	additionalConfigFiles: {}
+	additionalVolumes: *[] | _
+	additionalVolumeMounts: *[] | _
+	priorityClassName: *null | _
+	annotations: {}
+	labels: {}
+	configMounts: *[] | _
+	secretMounts: *[] | _
 }
-
-// ========== WORKER ==========
 worker: {
-  deployment: {
-    annotations: {}
-    progressDeadlineSeconds: 600
-    revisionHistoryLimit: 10
-    strategy: {}
-  }
-
-  jvm: {
-    maxHeapSize: *"8G" | string
-    minHeapSize: *"" | string
-    maxHeapPercent: *"" | string
-    initialHeapPercent: *"" | string
-    gcMethod: {
-      type: *"UseG1GC" | string
-      g1: {
-        heapRegionSize: *"32M" | string
-      }
-    }
-  }
-
-  config: {
-    memory: {
-      heapHeadroomPerNode: *"" | string
-    }
-    query: {
-      maxMemoryPerNode: *"1GB" | string
-    }
-  }
-
-  additionalJVMConfig: [...]
-  additionalExposedPorts: {}
-  resources: {}
-  livenessProbe: {}
-  readinessProbe: {}
-  startupProbe: {}
-  lifecycle: {}
-  gracefulShutdown: {
-    enabled: *false | bool
-    gracePeriodSeconds: 120
-  }
-  terminationGracePeriodSeconds: 30
-  nodeSelector: {}
-  tolerations: [...]
-  affinity: {}
-  topologySpreadConstraints: [...]
-  priorityClassName: *"" | string
-  annotations: {}
-  labels: {}
-  configMounts: [...]
-  secretMounts: [...]
-  additionalConfigFiles: {}
-  additionalVolumes: [...]
-  additionalVolumeMounts: [...]
-
-  // ========== ADDITIONAL PROPERTIES ==========
-  additionalNodeProperties:    [...]
-  additionalConfigProperties:  [...]
-  additionalLogProperties:     [...]
-  additionalExchangeManagerProperties: [...]
+	deployment: {
+		annotations: {}
+		progressDeadlineSeconds: *600 | _
+		revisionHistoryLimit:    *10 | _
+		strategy: {}
+	}
+	jvm: {
+		maxHeapSize:        *"8G" | _
+		minHeapSize:        *null | _
+		maxHeapPercent:     *null | _
+		initialHeapPercent: *null | _
+		gcMethod: {
+			type: *"UseG1GC" | _
+			g1: {
+				heapRegionSize: *"32M" | _
+			}
+		}
+	}
+	config: {
+		memory: {
+			heapHeadroomPerNode: *"" | _
+		}
+		query: {
+			maxMemoryPerNode: *"1GB" | _
+		}
+	}
+	additionalJVMConfig: *[] | _
+	additionalExposedPorts: {}
+	resources: {}
+	livenessProbe: {}
+	readinessProbe: {}
+	startupProbe: {}
+	lifecycle: {}
+	gracefulShutdown: {
+		enabled:            *false | _
+		gracePeriodSeconds: *120 | _
+	}
+	terminationGracePeriodSeconds: *30 | _
+	nodeSelector: {}
+	tolerations: *[] | _
+	affinity: {}
+	topologySpreadConstraints: *[] | _
+	additionalConfigFiles: {}
+	additionalVolumes: *[] | _
+	additionalVolumeMounts: *[] | _
+	priorityClassName: *null | _
+	annotations: {}
+	labels: {}
+	configMounts: *[] | _
+	secretMounts: *[] | _
+}
+kafka: {
+	mountPath: *"/etc/trino/schemas" | _
+	tableDescriptions: {}
+}
+jmx: {
+	enabled:      *false | _
+	registryPort: *9080 | _
+	serverPort:   *9081 | _
+	exporter: {
+		enabled:          *false | _
+		image:            *"bitnamilegacy/jmx-exporter:1.4.0" | _
+		pullPolicy:       *"Always" | _
+		port:             *5556 | _
+		configProperties: *"" | _
+		securityContext: {}
+		resources: {}
+	}
+	coordinator: {}
+	worker: {}
+}
+serviceMonitor: {
+	enabled:    *false | _
+	apiVersion: *"monitoring.coreos.com/v1" | _
+	labels: {
+		prometheus: *"kube-prometheus" | _
+	}
+	interval:      *"30s" | _
+	scrapeTimeout: *"" | _
+	coordinator: {}
+	worker: {}
+}
+commonLabels: {}
+ingress: {
+	enabled:   *false | _
+	className: *"" | _
+	annotations: {}
+	hosts: *[] | _
+	tls: *[] | _
+}
+gateway: {
+	enabled: *false | _
+	annotations: {}
+	parentRefs: *[] | _
+	hostnames: *[] | _
+	rules: *[] | _
+}
+networkPolicy: {
+	enabled: *false | _
+	ingress: *[] | _
+	egress: *[] | _
 }
