@@ -1,11 +1,11 @@
-nameOverride: ""
+nameOverride: null
 fullnameOverride: trino-dev
-coordinatorNameOverride: ""
-workerNameOverride: ""
+coordinatorNameOverride: null
+workerNameOverride: null
 image:
   registry: ""
   repository: trinodb/trino
-  tag: "422"
+  tag: "480"
   digest: ""
   useRepositoryAsSoleImageReference: false
   pullPolicy: IfNotPresent
@@ -29,9 +29,9 @@ server:
     authenticationType: PASSWORD
     query:
       maxMemory: 4GB
-    exchangeManager: {}
-    workerExtraConfig: ""
-    coordinatorExtraConfig: ""
+  exchangeManager: {}
+  workerExtraConfig: ""
+  coordinatorExtraConfig: ""
   autoscaling:
     enabled: false
     maxReplicas: 5
@@ -52,8 +52,20 @@ server:
 accessControl: {}
 headerAuthenticator: {}
 resourceGroups: {}
-sessionProperties: {}
-eventListenerProperties: []
+additionalNodeProperties: []
+additionalCatalogs: {}
+additionalConfigProperties:
+  - query.client.timeout=5m
+  - query.max-run-time=1h
+  - query.max-queued-time=30m
+additionalExchangeManagerProperties:
+  - exchange.s3.region=eu-west-1
+  - exchange.s3.endpoint=https://s3-dev.internal
+  - exchange.s3.aws-access-key=CHANGE_ME_S3_ACCESS_KEY
+  - exchange.s3.aws-secret-key=CHANGE_ME_S3_SECRET_KEY
+additionalLogProperties: []
+auth:
+  passwordAuth: admin:CHANGE_ME_ADMIN_PASSWORD
 catalogs:
   tpch: null
   tpcds: null
@@ -69,10 +81,6 @@ catalogs:
     hive.s3.path-style-access=true
     hive.s3.aws-access-key=CHANGE_ME_S3_ACCESS_KEY
     hive.s3.aws-secret-key=CHANGE_ME_S3_SECRET_KEY
-additionalCatalogs: {}
-auth:
-  passwordAuth: admin:CHANGE_ME_ADMIN_PASSWORD
-  passwordAuthSecret: ""
 configMounts: []
 containerSecurityContext:
   allowPrivilegeEscalation: false
@@ -89,9 +97,9 @@ coordinator:
     strategy: {}
   jvm:
     maxHeapSize: 4G
-    minHeapSize: ""
-    maxHeapPercent: ""
-    initialHeapPercent: ""
+    minHeapSize: null
+    maxHeapPercent: null
+    initialHeapPercent: null
     gcMethod:
       type: UseG1GC
       g1:
@@ -120,7 +128,10 @@ coordinator:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  priorityClassName: ""
+  additionalConfigFiles: {}
+  additionalVolumes: []
+  additionalVolumeMounts: []
+  priorityClassName: null
   annotations: {}
   labels: {}
   configMounts: []
@@ -131,18 +142,14 @@ coordinator:
     - name: s3-credentials
       secretName: trino-s3-credentials
       path: /etc/trino/secrets/s3
-  additionalConfigFiles: {}
-  additionalVolumes: []
-  additionalVolumeMounts: []
 env:
   - name: TRINO_ENV
     value: development
   - name: JAVA_TOOL_OPTIONS
     value: -Djavax.net.ssl.trustStore=/etc/trino/secrets/truststore.jks
 envFrom: []
-initContainers:
-  coordinator: []
-  worker: []
+eventListenerProperties: []
+initContainers: {}
 secretMounts: []
 securityContext:
   runAsUser: 1000
@@ -157,12 +164,11 @@ serviceAccount:
   create: false
   name: ""
   annotations: {}
+sessionProperties: {}
 shareProcessNamespace:
   coordinator: false
   worker: false
-sidecarContainers:
-  coordinator: []
-  worker: []
+sidecarContainers: {}
 worker:
   deployment:
     annotations:
@@ -173,9 +179,9 @@ worker:
     strategy: {}
   jvm:
     maxHeapSize: 4G
-    minHeapSize: ""
-    maxHeapPercent: ""
-    initialHeapPercent: ""
+    minHeapSize: null
+    maxHeapPercent: null
+    initialHeapPercent: null
     gcMethod:
       type: UseG1GC
       g1:
@@ -221,7 +227,10 @@ worker:
                     - trino-worker
             topologyKey: kubernetes.io/hostname
   topologySpreadConstraints: []
-  priorityClassName: ""
+  additionalConfigFiles: {}
+  additionalVolumes: []
+  additionalVolumeMounts: []
+  priorityClassName: null
   annotations: {}
   labels: {}
   configMounts: []
@@ -232,17 +241,46 @@ worker:
     - name: s3-credentials
       secretName: trino-s3-credentials
       path: /etc/trino/secrets/s3
-  additionalConfigFiles: {}
-  additionalVolumes: []
-  additionalVolumeMounts: []
-  additionalNodeProperties: []
-  additionalConfigProperties:
-    - query.client.timeout=5m
-    - query.max-run-time=1h
-    - query.max-queued-time=30m
-  additionalLogProperties: []
-  additionalExchangeManagerProperties:
-    - exchange.s3.region=eu-west-1
-    - exchange.s3.endpoint=https://s3-dev.internal
-    - exchange.s3.aws-access-key=CHANGE_ME_S3_ACCESS_KEY
-    - exchange.s3.aws-secret-key=CHANGE_ME_S3_SECRET_KEY
+kafka:
+  mountPath: /etc/trino/schemas
+  tableDescriptions: {}
+jmx:
+  enabled: false
+  registryPort: 9080
+  serverPort: 9081
+  exporter:
+    enabled: false
+    image: bitnamilegacy/jmx-exporter:1.4.0
+    pullPolicy: Always
+    port: 5556
+    configProperties: ""
+    securityContext: {}
+    resources: {}
+  coordinator: {}
+  worker: {}
+serviceMonitor:
+  enabled: false
+  apiVersion: monitoring.coreos.com/v1
+  labels:
+    prometheus: kube-prometheus
+  interval: 30s
+  scrapeTimeout: ""
+  coordinator: {}
+  worker: {}
+commonLabels: {}
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+gateway:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
